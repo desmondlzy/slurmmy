@@ -53,7 +53,8 @@ def watch(args):
             print(f"{num_idle_machines} idle, submit {start} - {stop - 1}")
             print("Number of tasks to run:", len(tasks) - cur)
 
-            child_args = args.slurmargs + " " + " ".join([
+            slurmargs = "srun " + args.slurmargs
+            child_args = slurmargs + " " + " ".join([
                 "python", os.path.join(os.path.dirname(__file__), "worker.py"), 
                 args.file,
                 "--start", str(start),
