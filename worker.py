@@ -4,7 +4,7 @@ from argparse import ArgumentParser
 
 def worker_args():
     parser = ArgumentParser()
-    parser.add_argument("file", required=True)
+    parser.add_argument("file")
     parser.add_argument("--start", type=int)
     parser.add_argument("--stop", type=int)
     parser.add_argument("--num-processes", type=int, default=1)
@@ -28,6 +28,6 @@ if __name__ == "__main__":
             p.map(sp.run, tasks)
     elif n_proc == 1:
         for task in tasks:
-            sp.check_call(task)
+            sp.check_call(task, shell=True)
     else:
         raise ValueError(f"Num processes should be strictly postive, get {n_proc}")

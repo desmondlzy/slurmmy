@@ -6,11 +6,11 @@ import time
 
 def dispatcher_args():
     parser = ArgumentParser()
-    parser.add_argument("file", required=True)
+    parser.add_argument("file")
     parser.add_argument("--tasks-per-machine", type=int, default=1)
     parser.add_argument("--num-machines", type=int, default=3)
     parser.add_argument("--num-processes", type=int, default=1)
-    parser.add_argument("--slurm-args", type=str, required=True)
+    parser.add_argument("--slurmargs", type=str, required=True)
 
     return parser.parse_args()
 
@@ -31,24 +31,26 @@ def watch(args):
     tasks_per_machine = args.tasks_per_machine
 
     with open(args.file, "r") as fp:
-        tasks = fp.readlines()
+        tasks = [line.strip() for line in fp.readlines()]
 
-    print("Dispatcher starts, number of tasks:", len(tasks))
+    print("Dispatcher started, number of tasks:", len(tasks))
 
     cur = 0
     while cur < len(tasks):
-        time.sleep(10)
 
         try:
             num_idle_machines = num_machines - len(running_jobs())
         except sp.CalledProcessError:
             num_idle_machines = num_machines
 
-        if num_idle_machines > 0:
+        if num_idle_machines == 0:
+            time.sleep(5)
+
+        elif num_idle_machines > 0:
             start, stop = cur, min(cur + tasks_per_machine, len(tasks))
             cur += tasks_per_machine
 
-            print(f"{num_idle_machines} idle, submit {start} - {stop}")
+            print(f"{num_idle_machines} idle, submit {start} - {stop - 1}")
             print("Number of tasks to run:", len(tasks) - cur)
 
             child_args = args.slurmargs + " " + " ".join([
@@ -58,8 +60,9 @@ def watch(args):
                 "--stop", str(stop),
                 "--num-processes", str(args.num_processes)
             ])
+            print(child_args)
 
-            sp.check_call(child_args)
+            sp.check_call(child_args, shell=True)
 
 
 if __name__ == "__main__":
