@@ -1,5 +1,6 @@
 import multiprocessing as mp
 import subprocess as sp
+import os
 from argparse import ArgumentParser
 
 def worker_args():
@@ -11,6 +12,9 @@ def worker_args():
 
     return parser.parse_args()
 
+def shell_run(cmd):
+    return sp.check_call(cmd, shell=True)
+
 if __name__ == "__main__":
     args = worker_args()
 
@@ -18,14 +22,16 @@ if __name__ == "__main__":
     stop  = args.stop
     n_proc = args.num_processes
 
+    print(os.getcwd())
+
     with open(args.file, "r") as fp:
         all_tasks = fp.readlines()
     
-    tasks = all_tasks[start:stop]
+    tasks = [task.strip() for task in all_tasks[start:stop]]
 
     if args.num_processes > 1:
         with mp.Pool(n_proc) as p:
-            p.map(sp.run, tasks)
+            p.map(shell_run, tasks)
     elif n_proc == 1:
         for task in tasks:
             sp.check_call(task, shell=True)

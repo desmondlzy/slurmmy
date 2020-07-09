@@ -23,6 +23,7 @@ def invoke_worker(args, start, stop):
         "--stop", str(stop),
         "--num-processes", str(args.num_processes)
     ]
+    print(" ".join(childargs))
     sp.check_call(childargs)
 
 def watch(args):
@@ -37,12 +38,12 @@ def watch(args):
 
     print(f"Dispatcher ready, num_tasks: {num_tasks}, num_machines: {num_machines}, tasks_per_machine: {tasks_per_machine}")
     jobs = [
-        (task, start, min(start + tasks_per_machine, num_tasks)) 
-        for task, start in zip(tasks, start_range)
+        (args, start, min(start + tasks_per_machine, num_tasks)) 
+        for start in start_range
     ]
 
     with mp.Pool(num_machines) as p:
-        p.map(invoke_worker, jobs)
+        p.starmap(invoke_worker, jobs)
 
 
 if __name__ == "__main__":
