@@ -1,7 +1,7 @@
 Slummy
 =================
 
-Tens of thousands of machine learning tasks to submit and run through [slurm](https://slurm.schedmd.com/documentation.html)? Little quotas, long-time waiting, don't want to get stuck in front of the terminal, waiting forever? You may find these out-of-box automated scripts come in handy.
+Tens of thousands of machine learning tasks to submit and run through [slurm](https://slurm.schedmd.com/documentation.html)? Little quotas, long-time waiting, don't want to get stuck in front of the terminal, waiting forever? You may find these out-of-box, minimal, zero-extra-dependency automated scripts come in handy.
 
 Quick start
 -----------------

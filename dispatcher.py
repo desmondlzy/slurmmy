@@ -14,17 +14,16 @@ def dispatcher_args():
 
     return parser.parse_args()
 
-def username():
-    homedir = os.path.expanduser("~")
-    _, user = os.path.split(homedir)
-
-    return user
-
-def running_jobs():
-    args = [f"squeue --users={username()}"]
-    lines = sp.check_output(args, shell=True).decode("utf-8").splitlines()[1:]
-
-    return lines
+def invoke_worker(args, start, stop):
+    slurmargs = ["srun"] + [arg for arg in args.slurmargs.split()]
+    childargs = slurmargs + [
+        "python", os.path.join(os.path.dirname(__file__), "worker.py"), 
+        args.file,
+        "--start", str(start),
+        "--stop", str(stop),
+        "--num-processes", str(args.num_processes)
+    ]
+    sp.check_call(childargs)
 
 def watch(args):
     num_machines = args.num_machines
@@ -33,37 +32,17 @@ def watch(args):
     with open(args.file, "r") as fp:
         tasks = [line.strip() for line in fp.readlines()]
 
-    print("Dispatcher started, number of tasks:", len(tasks))
+    num_tasks = len(tasks)
+    start_range = range(0, num_tasks, tasks_per_machine)
 
-    cur = 0
-    while cur < len(tasks):
+    print(f"Dispatcher ready, num_tasks: {num_tasks}, num_machines: {num_machines}, tasks_per_machine: {tasks_per_machine}")
+    jobs = [
+        (task, start, min(start + tasks_per_machine, num_tasks)) 
+        for task, start in zip(tasks, start_range)
+    ]
 
-        try:
-            num_idle_machines = num_machines - len(running_jobs())
-        except sp.CalledProcessError:
-            num_idle_machines = num_machines
-
-        if num_idle_machines == 0:
-            time.sleep(5)
-
-        elif num_idle_machines > 0:
-            start, stop = cur, min(cur + tasks_per_machine, len(tasks))
-            cur += tasks_per_machine
-
-            print(f"{num_idle_machines} idle, submit {start} - {stop - 1}")
-            print("Number of tasks to run:", len(tasks) - cur)
-
-            slurmargs = "srun " + args.slurmargs
-            child_args = slurmargs + " " + " ".join([
-                "python", os.path.join(os.path.dirname(__file__), "worker.py"), 
-                args.file,
-                "--start", str(start),
-                "--stop", str(stop),
-                "--num-processes", str(args.num_processes)
-            ])
-            print(child_args)
-
-            sp.check_call(child_args, shell=True)
+    with mp.Pool(num_machines) as p:
+        p.map(invoke_worker, jobs)
 
 
 if __name__ == "__main__":
