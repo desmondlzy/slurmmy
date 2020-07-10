@@ -4,12 +4,13 @@ import subprocess as sp
 import multiprocessing as mp
 from argparse import ArgumentParser
 import time
+from datetime import datetime
 
 def dispatcher_args():
     parser = ArgumentParser()
     parser.add_argument("file")
     parser.add_argument("--tasks-per-allocation", type=int, default=1)
-    parser.add_argument("--num-machines", type=int, default=3)
+    parser.add_argument("--num-machines", type=int, default=4)
     parser.add_argument("--num-processes", type=int, default=1)
     parser.add_argument("--slurmargs", type=str, required=True)
     return parser.parse_args()
@@ -36,18 +37,27 @@ def running_jobs():
     return lines
 
 def batch_run(args, worker_args):
-    with open("template.sbatch", "r") as fp:
-        formatted_batch = fp.read().format(worker_args)
+    mapping = {
+        "cmd": " ".join(worker_args),
+        "name": datetime.now().strftime("%Y%m%d-%H%M%S"),
+    }
+    template = os.path.join(os.path.dirname(__file__), "template.sbatch")
+    with open(template, "r") as fp:
+        formatted_batch = fp.read().format_map(mapping)
     
     with open("job.sbatch", "w") as fp:
         fp.write(formatted_batch)
     
-    sbatch_args = ["sbatch", args.slurmargs]
-    sp.check_call(sbatch_args + ["job.sbatch"])
+    sbatch_args = ["sbatch"] + shlex.split(args.slurmargs) + ["job.sbatch"]
+
+    print(sbatch_args)
+
+    sp.run(sbatch_args, check=True)
 
     try:
         os.remove("job.sbatch")
-
+    except:
+        pass
 
 def watch(args):
     num_machines = args.num_machines
