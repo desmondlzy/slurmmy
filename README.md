@@ -40,6 +40,7 @@ Internally, for each submission, Slummy aggregates jobs and accordingly renders 
 
 - `{cmd}`: **Required**, the invocation of `worker` will be rendered here.
 - `{time}`: Timestamp for the beginning of the submission.
+- `{job_index}`: The index of job submission, starting from 0
 
 Notes
 ------------------

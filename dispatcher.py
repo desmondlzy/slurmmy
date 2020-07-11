@@ -45,12 +45,11 @@ def running_jobs():
 
     return lines
 
-def batch_run(args, worker_args):
+def batch_run(args, worker_args, **mapping):
     timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-    mapping = {
-        "cmd": " ".join(worker_args),
-        "time": timestamp
-    }
+    mapping["cmd"] = " ".join(worker_args)
+    mapping["time"] = timestamp
+
     with open(args.template, "r") as fp:
         formatted_batch = fp.read().format_map(mapping)
     
@@ -83,10 +82,10 @@ def watch(args):
         for start in start_range
     ]
 
-    for job in worker_jobs:
+    for i, job in enumerate(worker_jobs):
         while num_machines - len(running_jobs()) <= 0:
             time.sleep(5)
-        batch_run(args, job)
+        batch_run(args, job, job_index=i)
         
 
 

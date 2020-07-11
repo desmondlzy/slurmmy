@@ -1,6 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name={name}
-#SBATCH --output={name}-out.txt
-
+#SBATCH --job-name={job_index}
+#SBATCH --output={job_index}-{time}.log
 pwd
 {cmd}
