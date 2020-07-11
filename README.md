@@ -30,7 +30,7 @@ Usage
 Following the above section, you could leverage the command line arguments (inspect them via `-h`) as per your own cases and environments to get optimized running scheduling.
 
 - `--slurm-args`: Required arguments for `sbatch`. Everything here should be enclosed in a pair of quotation marks and will be directly passed to `sbatch` during the execution. For example, `--slurm-args="--gres=gpu:1 -c=10"`. Refer to slurm's [cheatsheet](https://slurm.schedmd.com/pdfs/summary.pdf) for more details.
-- `--tasks-per-machine`: Number of tasks (number of lines of commands in the input file) allocated to one server each time. (default: 1)
+- `--tasks-per-allocation`: Number of tasks (number of lines of commands in the input file) allocated to one server each time. (default: 1)
 - `--num-machines`: Number of worker machines you want to use. It should not exceed the maximum number available to you as per your slurm accounting policy. (default: 4)
 - `--num-processes`: Number of processes to launch on each worker machine to run the allocated task using process-level parallelism (via `multiprocessing.Pool`). If set to 1, no parallelism will be conducted. *Usually, this number shouldn't exceed the number of cores applied through slurm for each task (i.e. `-c`).* (default: 1)
 - `--template`: Path to your template file, see the [template section](#template) for more info.
