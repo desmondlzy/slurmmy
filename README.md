@@ -45,4 +45,4 @@ Internally, for each submission, Slummy aggregates jobs and accordingly renders 
 
 Notes
 ------------------
-The scripts hosted here were written based on my own need, for my own developing environment, where the number of pending jobs is quite limited and the `array` and `ntask` feature of slurm doesn't work very well.
+The scripts hosted here were written based on my own need when I was an undergrad in at CUHK. Everything was targeting the departmental remote machine, where the number of pending jobs is quite limited (only 5) and the `array` and `ntask` feature of slurm didn't work. What's hosted here may not be the best solution to the problem you're facing.
